@@ -115,7 +115,7 @@ def nodes_gradient_step(G, nodes, stepsize=1):
 
 def smooth_graph(G, nodes=None, n_its=1, kernel_size=1):
     '''Smooth all nodes of retmap (replace each node with mean of neighbours)'''
-    if isinstance(nodes, list):
+    if not isinstance(nodes, list):
         nodes = G.nodes()
     G_smooth = G.copy()
     for it in range(n_its):
