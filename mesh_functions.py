@@ -16,10 +16,11 @@ def nifti_to_graph(nifti_name, mgh_name=None)
         G.add_edges_from(list(itertools.combinations(row, 2)))
 
     if isinstance(mgh_name, str)
+        data = nibabel.load(mgh_name)
         # This gives a one-dimensional array of (N,) - for one per node
-        map_data = retmap.darrays[0].data
+        map_data = data.darrays[0].data
 
-        # retmap colors to node colors:
+        # data colors to node colors:
         color_map = map_data[nodes_to_add]
 
         # dictionary of attributes to add to graph
@@ -52,7 +53,7 @@ def get_neighbours_and_vals(G, nodes):
     for node in nodes:
         for neighbours, _ in G.adj[node].items():
             node_neighbours.append(neighbours)
-            vals.append(G.nodes[neighbours]["retmap_val"])
+            vals.append(G.nodes[neighbours]["map_val"])
     return dict(zip(node_neighbours, vals))
 
 def get_multi_neighbours_and_vals(G, nodes, neighbourhood_size):
@@ -93,8 +94,8 @@ def expand_nodes(G, nodes, stepsize=1):
 
 # will be useful for gradient ascent
 def max_neighbour(G, node, neighbourhood_size=1):
-    '''Return node with maximum retmap value amoung neighbours (and neighbours
-    of neighbours etc...)'''
+    '''Return node with maximum map value amoung neighbours (and neighbours of
+    neighbours etc...)'''
     neighbours = get_multi_neighbours_and_vals(G, [node], neighbourhood_size)
     return (max(neighbours, key=neighbours.get), max(neighbours.values()))
 
@@ -103,9 +104,9 @@ def max_neighbour(G, node, neighbourhood_size=1):
 def nodes_gradient_step(G, nodes, stepsize=1):
     '''Return new nodes positions where each node is replaced by that node's
     maximum neighbour in <stepsize>'''
-    retmap_values = get_node_attributes_as_list(G, nodes, key="retmap_val")
+    map_values = get_node_attributes_as_list(G, nodes, key="map_val")
     new_positions = []
-    for node, retval in zip(nodes, retmap_values):
+    for node, retval in zip(nodes, map_values):
         max_info = max_neighbour(G, node, neighbourhood_size=stepsize)
         if retval < max_info[1]:
             new_positions.append(max_info[0])
@@ -114,7 +115,7 @@ def nodes_gradient_step(G, nodes, stepsize=1):
     return new_positions
 
 def smooth_graph(G, nodes=None, n_its=1, kernel_size=1):
-    '''Smooth all nodes of retmap (replace each node with mean of neighbours)'''
+    '''Smooth all nodes of map (replace each node with mean of neighbours)'''
     if not isinstance(nodes, list):
         nodes = G.nodes()
     G_smooth = G.copy()
@@ -124,7 +125,7 @@ def smooth_graph(G, nodes=None, n_its=1, kernel_size=1):
         for node in nodes:
             out = get_multi_neighbours_and_vals(G_smooth, [node], kernel_size)
             mean = np.nanmean(list(out.values()))
-            color_map_dict[node] = {"retmap_val": mean}
+            color_map_dict[node] = {"map_val": mean}
         nx.set_node_attributes(G_smooth, color_map_dict)
     return G_smooth
 
@@ -149,12 +150,12 @@ def set3Dview(ax):
     ax.set_facecolor('black')
     return None
 
-def plot_nodes(mesh_coords, retmap_data, node_sets, colors = ['white', 'black', 'pink']):
+def plot_nodes(mesh_coords, map_data, node_sets, colors = ['white', 'black', 'pink']):
     '''nodes_sets is a list of upto 3 sets of nodes to draw - each will have a
     different colour'''
     ax = plt.axes(projection='3d')
     ax.scatter3D(mesh_coords[:, 0], mesh_coords[:, 1],
-                 mesh_coords[:, 2], s=1, c=retmap_data, cmap='jet')
+                 mesh_coords[:, 2], s=1, c=map_data, cmap='jet')
     for nodes, color in zip(node_sets, colors):
         ax.scatter3D(mesh_coords[nodes, 0], mesh_coords[nodes, 1],
                      mesh_coords[nodes, 2], marker='o', s=30, c=color)
