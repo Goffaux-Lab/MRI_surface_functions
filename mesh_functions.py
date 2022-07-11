@@ -3,7 +3,21 @@ import numpy as np
 import networkx as nx
 import itertools
 
-def nifti_to_graph(nifti_name, mgh_name=None):
+def handle_ext(ext):
+    if ext[0] != '.':
+        ext = f'.{ext}'
+    return ext
+
+def get_surf_data(data_obj, ext):
+    if ext == '.gii':
+        data_array = data_obj.darrays[0].data
+    elif ext == '.mgh':
+        data_array = data_obj.get_data()
+    return data_array
+
+def nifti_to_graph(nifti_name, mgh_name=None, ext='.gii'):
+    ext = handle_ext(ext)
+
     # each row of mesh_coords are the x, y, z coordinates of a node
     # each row of mesh_faces are the nodes that define that face
     mesh_coords, mesh_faces = nibabel.freesurfer.io.read_geometry(nifti_name)
@@ -16,9 +30,10 @@ def nifti_to_graph(nifti_name, mgh_name=None):
         G.add_edges_from(list(itertools.combinations(row, 2)))
 
     if isinstance(mgh_name, str):
-        data = nibabel.load(mgh_name)
+        data_obj = nibabel.load(f'{mgh_name}{ext}')
+
         # This gives a one-dimensional array of (N,) - for one per node
-        map_data = data.darrays[0].data
+        map_data = get_surf_data(data_obj, ext)
 
         # data colors to node colors:
         color_map = map_data[nodes_to_add]
