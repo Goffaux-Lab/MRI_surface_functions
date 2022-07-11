@@ -8,6 +8,7 @@ def handle_ext(ext):
         ext = f'.{ext}'
     return ext
 
+
 def get_surf_data(data_obj, ext):
     if ext == '.gii':
         data_array = data_obj.darrays[0].data
@@ -15,38 +16,48 @@ def get_surf_data(data_obj, ext):
         data_array = data_obj.get_data()
     return data_array
 
-def nifti_to_graph(nifti_name, mgh_name=None, ext='.gii'):
+
+def add_map_to_surface(G, nodes_to_map, map_name, ext):
     ext = handle_ext(ext)
 
-    # each row of mesh_coords are the x, y, z coordinates of a node
-    # each row of mesh_faces are the nodes that define that face
-    mesh_coords, mesh_faces = nibabel.freesurfer.io.read_geometry(nifti_name)
+    data_obj = nibabel.load(f'{map_name}{ext}')
 
-    nodes_to_add = np.unique(mesh_faces)
+    # This gives a one-dimensional array of (N,) - for one per node
+    map_data = get_surf_data(data_obj, ext)
+
+    # data colors to node colors:
+    color_map = map_data[nodes_to_map]
+
+    # dictionary of attributes to add to graph
+    color_map_dict = {}
+    for i, color in zip(G.nodes, color_map):
+        color_map_dict[i] = {"map_val": color}
+
+    # add the attributes
+    nx.set_node_attributes(G, color_map_dict)
+
+    return G
+
+
+def nifti_to_graph(nifti_name, mesh_faces, nodes_to_add):
     G = nx.Graph()
     # construct the graph nodes and edges
     G.add_nodes_from(nodes_to_add)
     for i, row in enumerate(mesh_faces):
         G.add_edges_from(list(itertools.combinations(row, 2)))
 
-    if isinstance(mgh_name, str):
-        data_obj = nibabel.load(f'{mgh_name}{ext}')
-
-        # This gives a one-dimensional array of (N,) - for one per node
-        map_data = get_surf_data(data_obj, ext)
-
-        # data colors to node colors:
-        color_map = map_data[nodes_to_add]
-
-        # dictionary of attributes to add to graph
-        color_map_dict = {}
-        for i, color in zip(G.nodes, color_map):
-            color_map_dict[i] = {"map_val": color}
-
-        # add the attributes
-        nx.set_node_attributes(G, color_map_dict)
-
     return G
+
+
+def surf_and_map_to_graph(nifti_name, map_name, ext):
+    # each row of mesh_faces are the nodes that define that face
+    _, mesh_faces = nibabel.freesurfer.io.read_geometry(nifti_name)
+    nodes_to_add = np.unique(mesh_faces)
+
+    G = nifti_to_graph(nifti_name, mesh_faces, nodes_to_add)
+    G = add_map_to_surface(G, nodes_to_add, map_name, ext)
+    return G
+
 
 def get_node_attributes_as_list(G, nodes=None, key=None):
     '''Extract node attributes: from dictionary take the values based on <key>
@@ -58,6 +69,7 @@ def get_node_attributes_as_list(G, nodes=None, key=None):
     for i in nodes:
         tmp.append(G.nodes[i][key])
     return tmp
+
 
 def get_neighbours_and_vals(G, nodes):
     '''Get neighbours and associated values of set of nodes as dictionary'''
@@ -71,12 +83,14 @@ def get_neighbours_and_vals(G, nodes):
             vals.append(G.nodes[neighbours]["map_val"])
     return dict(zip(node_neighbours, vals))
 
+
 def get_multi_neighbours_and_vals(G, nodes, neighbourhood_size):
     neighbourhood = {}
     for i in range(neighbourhood_size):
         neighbours = get_neighbours_and_vals(G, nodes)
         neighbourhood.update(neighbours)
     return neighbourhood
+
 
 def is_node_on_region_border(G, region_nodes, node):
     '''For a graph <G>, and a patch-like subset of its nodes <region_nodes>,
@@ -86,6 +100,7 @@ def is_node_on_region_border(G, region_nodes, node):
     n_nodes_in_region = len(set(neighbours.keys()).intersection(label_coords))
     return n_nodes_in_region < total_neighbours
 
+
 def find_region_border(G, nodes):
     '''Return the nodes that have neighbours in the graph that don't appear in
     the original set of nodes'''
@@ -94,6 +109,7 @@ def find_region_border(G, nodes):
         if is_node_on_region_border(G, nodes, node):
             border_nodes.append(node)
     return border_nodes
+
 
 def remove_out_of_region_nodes(G, region_nodes, nodes):
     # intersection is taking the overlapping part in a venn diagram
@@ -129,6 +145,7 @@ def nodes_gradient_step(G, nodes, stepsize=1):
             new_positions.append(node)
     return new_positions
 
+
 def smooth_graph(G, nodes=None, n_its=1, kernel_size=1):
     '''Smooth all nodes of map (replace each node with mean of neighbours)'''
     if not isinstance(nodes, list):
@@ -155,6 +172,7 @@ def setzoomed3Dview(ax):
     ax.set_facecolor('black')
     return None
 
+
 def set3Dview(ax):
     ax.azim = -60
     ax.elev = -16
@@ -164,6 +182,7 @@ def set3Dview(ax):
     ax.set_zlim(-100, 100)
     ax.set_facecolor('black')
     return None
+
 
 def plot_nodes(mesh_coords, map_data, node_sets, colors = ['white', 'black', 'pink']):
     '''nodes_sets is a list of upto 3 sets of nodes to draw - each will have a
