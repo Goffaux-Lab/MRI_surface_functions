@@ -3,7 +3,7 @@ import numpy as np
 import networkx as nx
 import itertools
 
-def nifti_to_graph(nifti_name, mgh_name=None)
+def nifti_to_graph(nifti_name, mgh_name=None):
     # each row of mesh_coords are the x, y, z coordinates of a node
     # each row of mesh_faces are the nodes that define that face
     mesh_coords, mesh_faces = nibabel.freesurfer.io.read_geometry(nifti_name)
@@ -15,21 +15,21 @@ def nifti_to_graph(nifti_name, mgh_name=None)
     for i, row in enumerate(mesh_faces):
         G.add_edges_from(list(itertools.combinations(row, 2)))
 
-    if isinstance(mgh_name, str)
-        data = nibabel.load(mgh_name)
-        # This gives a one-dimensional array of (N,) - for one per node
-        map_data = data.darrays[0].data
+        if isinstance(mgh_name, str):
+            data = nibabel.load(mgh_name)
+            # This gives a one-dimensional array of (N,) - for one per node
+            map_data = data.darrays[0].data
 
-        # data colors to node colors:
-        color_map = map_data[nodes_to_add]
+            # data colors to node colors:
+            color_map = map_data[nodes_to_add]
 
-        # dictionary of attributes to add to graph
-        color_map_dict = {}
-        for i, color in zip(G.nodes, color_map):
-            color_map_dict[i] = {"map_val": color}
+            # dictionary of attributes to add to graph
+            color_map_dict = {}
+            for i, color in zip(G.nodes, color_map):
+                color_map_dict[i] = {"map_val": color}
 
-        # add the attributes
-        nx.set_node_attributes(G, color_map_dict)
+            # add the attributes
+            nx.set_node_attributes(G, color_map_dict)
 
     return G
 
