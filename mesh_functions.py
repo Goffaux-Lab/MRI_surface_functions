@@ -17,6 +17,26 @@ def get_surf_data(data_obj, ext):
     return data_array
 
 
+def load_surface_info(nifti_name):
+    # each row of mesh_faces are the nodes that define that face
+    _, mesh_faces = nibabel.freesurfer.io.read_geometry(nifti_name)
+    nodes_to_add = np.unique(mesh_faces)
+    return mesh_faces, nodes_to_add
+
+
+def nifti_to_graph(nifti_name, mesh_faces=None, nodes_to_add=None):
+    if mesh_faces is None or nodes_to_add is None:
+        mesh_faces, nodes_to_add = load_surface_info(nifti_name)
+
+    G = nx.Graph()
+    # construct the graph nodes and edges
+    G.add_nodes_from(nodes_to_add)
+    for i, row in enumerate(mesh_faces):
+        G.add_edges_from(list(itertools.combinations(row, 2)))
+
+    return G
+
+
 def add_map_to_surface(G, nodes_to_map, map_name, ext):
     ext = handle_ext(ext)
 
@@ -39,21 +59,8 @@ def add_map_to_surface(G, nodes_to_map, map_name, ext):
     return G
 
 
-def nifti_to_graph(nifti_name, mesh_faces, nodes_to_add):
-    G = nx.Graph()
-    # construct the graph nodes and edges
-    G.add_nodes_from(nodes_to_add)
-    for i, row in enumerate(mesh_faces):
-        G.add_edges_from(list(itertools.combinations(row, 2)))
-
-    return G
-
-
 def surf_and_map_to_graph(nifti_name, map_name, ext):
-    # each row of mesh_faces are the nodes that define that face
-    _, mesh_faces = nibabel.freesurfer.io.read_geometry(nifti_name)
-    nodes_to_add = np.unique(mesh_faces)
-
+    mesh_faces, nodes_to_add = load_surface_info(nifti_name)
     G = nifti_to_graph(nifti_name, mesh_faces, nodes_to_add)
     G = add_map_to_surface(G, nodes_to_add, map_name, ext)
     return G
