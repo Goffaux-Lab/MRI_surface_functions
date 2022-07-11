@@ -2,7 +2,7 @@
 Python functions for loading and manipulating a surface and functional map as a
 graph object.
 
-<img align="right" width="50%" src="/images/done.gif">
+<img align="left" width="65%" src="/images/done.gif">
 
 And here is some text:
 To resize your image, simply set width="30%", or whatever percent you'd like
