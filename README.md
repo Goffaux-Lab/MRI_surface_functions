@@ -17,7 +17,7 @@ lot of triangles).
 For a brain surface, you also have information about where each vertex is
 located in 3D space. This extra information allows you to plot all the vertices
 in a 3D scatterplot, but the important information is which vertices are
-connected to which other vertices by edges.
+connected to each other by edges.
 
 With fMRI data, we often have functional maps that we display on the surface.
 Maps are a set of values - one per vertex. So we can color code the vertices
