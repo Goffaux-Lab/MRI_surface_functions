@@ -84,8 +84,17 @@ def graph_has_attributes(G):
 
 
 def get_map_data(G):
-    if graph_has_attributes():
-        return = get_node_attributes_as_list(G, list(G.nodes), key='map_val')
+    if graph_has_attributes(G):
+        return get_node_attributes_as_list(G, list(G.nodes), key='map_val')
+
+
+def coorce_map_nan_to_zero(map_data):
+    tmp = []
+    for x in map_data:
+        if np.isnan(x):
+            x = 0
+        tmp.append(np.float(x))
+    return tmp
 
 
 def get_neighbours_and_vals(G, nodes):
@@ -200,14 +209,16 @@ def setzoomed3Dview(ax):
     return None
 
 
-def plot_nodes(G, nifti_name, map_data, node_sets=None, colors = ['white', 'black', 'pink']):
+def plot_nodes(G, nifti_name, node_sets=None, colors = ['white', 'black', 'pink']):
     '''nodes_sets is a list of upto 3 sets of nodes to draw - each will have a
     different colour'''
 
     mesh_coords, _ = nibabel.freesurfer.io.read_geometry(nifti_name)
 
-    if graph_has_attributes:
+    if graph_has_attributes(G):
         map_data = get_map_data(G)
+
+        map_data = coorce_map_nan_to_zero(map_data)
 
         ax = plt.axes(projection='3d')
         ax.scatter3D(mesh_coords[:, 0], mesh_coords[:, 1],
