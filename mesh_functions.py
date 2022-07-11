@@ -2,6 +2,7 @@ import nibabel
 import numpy as np
 import networkx as nx
 import itertools
+import matplotlib.pyplot as plt
 
 def handle_ext(ext):
     if ext[0] != '.':
@@ -78,6 +79,15 @@ def get_node_attributes_as_list(G, nodes=None, key=None):
     return tmp
 
 
+def graph_has_attributes(G):
+    return G.nodes[0] != {}
+
+
+def get_map_data(G):
+    if graph_has_attributes():
+        return = get_node_attributes_as_list(G, list(G.nodes), key='map_val')
+
+
 def get_neighbours_and_vals(G, nodes):
     '''Get neighbours and associated values of set of nodes as dictionary'''
     if isinstance(nodes, int):
@@ -122,6 +132,7 @@ def remove_out_of_region_nodes(G, region_nodes, nodes):
     # intersection is taking the overlapping part in a venn diagram
     return list(set(region_nodes).intersection(set(nodes)))
 
+
 def expand_nodes(G, nodes, stepsize=1):
     orig_nodes = nodes[:]
     for i in range(stepsize):
@@ -130,12 +141,14 @@ def expand_nodes(G, nodes, stepsize=1):
     new_nodes=list(set(nodes)-set(orig_nodes))
     return nodes, new_nodes
 
+
 # will be useful for gradient ascent
 def max_neighbour(G, node, neighbourhood_size=1):
     '''Return node with maximum map value amoung neighbours (and neighbours of
     neighbours etc...)'''
     neighbours = get_multi_neighbours_and_vals(G, [node], neighbourhood_size)
     return (max(neighbours, key=neighbours.get), max(neighbours.values()))
+
 
 # makes the whole path to take a step in the right direction
 # each node here is treated independently
@@ -168,38 +181,43 @@ def smooth_graph(G, nodes=None, n_its=1, kernel_size=1):
         nx.set_node_attributes(G_smooth, color_map_dict)
     return G_smooth
 
+
 # some functions for plotting
+def set3Dview(ax):
+    ax.set_xlim(-100, 100)
+    ax.set_ylim(-100, 100)
+    ax.set_zlim(-100, 100)
+    ax.set_facecolor('black')
+    ax.set_box_aspect((1,1,1))
+    return None
+
+
 def setzoomed3Dview(ax):
+    set3Dview()
     ax.azim =-77.20329531963876
     ax.elev =-3.8354678562436106
     ax.dist = 2.0
-    ax.set_xlim(-100, 100)
-    ax.set_ylim(-100, 100)
-    ax.set_zlim(-100, 100)
-    ax.set_facecolor('black')
     return None
 
 
-def set3Dview(ax):
-    ax.azim = -60
-    ax.elev = -16
-    ax.dist = 5
-    ax.set_xlim(-100, 100)
-    ax.set_ylim(-100, 100)
-    ax.set_zlim(-100, 100)
-    ax.set_facecolor('black')
-    return None
-
-
-def plot_nodes(mesh_coords, map_data, node_sets, colors = ['white', 'black', 'pink']):
+def plot_nodes(G, nifti_name, map_data, node_sets=None, colors = ['white', 'black', 'pink']):
     '''nodes_sets is a list of upto 3 sets of nodes to draw - each will have a
     different colour'''
-    ax = plt.axes(projection='3d')
-    ax.scatter3D(mesh_coords[:, 0], mesh_coords[:, 1],
-                 mesh_coords[:, 2], s=1, c=map_data, cmap='jet')
-    for nodes, color in zip(node_sets, colors):
-        ax.scatter3D(mesh_coords[nodes, 0], mesh_coords[nodes, 1],
-                     mesh_coords[nodes, 2], marker='o', s=30, c=color)
-    setzoomed3Dview(ax)
+
+    mesh_coords, _ = nibabel.freesurfer.io.read_geometry(nifti_name)
+
+    if graph_has_attributes:
+        map_data = get_map_data(G)
+
+        ax = plt.axes(projection='3d')
+        ax.scatter3D(mesh_coords[:, 0], mesh_coords[:, 1],
+                     mesh_coords[:, 2], s=1, c=map_data, cmap='jet')
+
+    if node_sets is not None:
+        for nodes, color in zip(node_sets, colors):
+            ax.scatter3D(mesh_coords[nodes, 0], mesh_coords[nodes, 1],
+                         mesh_coords[nodes, 2], marker='o', s=30, c=color)
+
+    set3Dview(ax)
     return ax
 
