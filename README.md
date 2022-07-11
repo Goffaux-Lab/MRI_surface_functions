@@ -1,7 +1,7 @@
 # MRI_surface_functions
 Python functions for loading and manipulating a surface and functional map as a
 [graph object](https://en.wikipedia.org/wiki/Graph_(discrete_mathematics))
-(made with help from [Umut Canoluk](https://github.com/dafrius). The functions
+(made with help from [Umut Canoluk](https://github.com/dafrius)). The functions
 in this repository allow you to do a few things that might not be so easy in
 FSL. To use them, you have to think of the surface, the functional maps, the
 labels/patches as a [graph
