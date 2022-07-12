@@ -38,13 +38,19 @@ def nifti_to_graph(nifti_name, mesh_faces=None, nodes_to_add=None):
     return G
 
 
-def add_map_to_surface(G, nodes_to_map, map_name, ext):
-    ext = handle_ext(ext)
-
+def load_map_data(map_name, ext):
     data_obj = nibabel.load(f'{map_name}{ext}')
 
     # This gives a one-dimensional array of (N,) - for one per node
     map_data = get_surf_data(data_obj, ext)
+
+    return map_data
+
+
+def add_map_to_surface(G, nodes_to_map, map_name, ext):
+    ext = handle_ext(ext)
+
+    map_data = load_map_data(map_name, ext)
 
     # data colors to node colors:
     color_map = map_data[nodes_to_map]
