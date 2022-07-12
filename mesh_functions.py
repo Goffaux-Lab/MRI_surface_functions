@@ -210,6 +210,8 @@ def plot_nodes(G, nifti_name, node_sets=None, colors = ['white', 'black', 'pink'
     if graph_has_attributes(G):
         map_data = get_map_data_as_list(G)
 
+        map_data = [0 if np.isnan(x) else x for x in map_data]
+
         ax = plt.axes(projection='3d')
         ax.scatter3D(mesh_coords[:, 0], mesh_coords[:, 1],
                      mesh_coords[:, 2], s=1, c=map_data, cmap='jet')
