@@ -193,6 +193,13 @@ def smooth_graph(G, nodes=None, n_its=1, kernel_size=1):
     return G_smooth
 
 
+def define_map_clusters(G):
+    map_data = get_map_data_as_list(G)
+    for x in map_data:
+        get_neighbours_and_vals(G, nodes)
+    pass
+
+
 # some functions for plotting
 def set3Dview(ax):
     ax.set_xlim(-100, 100)
