@@ -149,11 +149,13 @@ def remove_out_of_region_nodes(G, region_nodes, nodes):
     return list(set(region_nodes).intersection(set(nodes)))
 
 
-def expand_nodes(G, nodes, stepsize=1, ignore_nans=False):
+def expand_nodes(G, nodes, stepsize=1, map_thresh=None, ignore_nans=False):
     orig_nodes = nodes[:]
     for i in range(stepsize):
         neighbours = get_neighbours_and_vals(G, nodes)
-        if ignore_nans:
+        if map_thresh:
+            neighbours = [k for k,v in neighbours.items() if v > map_thresh]
+        elif ignore_nans:
             neighbours = [k for k,v in neighbours.items() if not np.isnan(v)]
         else:
             neighbours = neighbours.keys()
