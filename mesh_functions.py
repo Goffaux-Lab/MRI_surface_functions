@@ -95,6 +95,15 @@ def get_map_data_as_list(G):
     return map_data
 
 
+def get_map_as_dict(G, ignore_nans=False):
+    map_dict = {}
+    for node in G.nodes:
+        v = np.float(G.nodes[node]['map_val'])
+        if ignore_nans and not np.isnan(v):
+            map_dict.update({node:v})
+    return map_dict
+
+
 def get_neighbours_and_vals(G, nodes):
     '''Get neighbours and associated values of set of nodes as dictionary'''
     if isinstance(nodes, int):
