@@ -38,13 +38,19 @@ def nifti_to_graph(nifti_name, mesh_faces=None, nodes_to_add=None):
     return G
 
 
-def add_map_to_surface(G, nodes_to_map, map_name, ext):
+def load_map_data(map_name, ext):
     ext = handle_ext(ext)
 
     data_obj = nibabel.load(f'{map_name}{ext}')
 
     # This gives a one-dimensional array of (N,) - for one per node
     map_data = get_surf_data(data_obj, ext)
+
+    return map_data
+
+
+def add_map_to_surface(G, nodes_to_map, map_name, ext):
+    map_data = load_map_data(map_name, ext)
 
     # data colors to node colors:
     color_map = map_data[nodes_to_map]
@@ -83,18 +89,19 @@ def graph_has_attributes(G):
     return G.nodes[0] != {}
 
 
-def get_map_data(G):
-    if graph_has_attributes(G):
-        return get_node_attributes_as_list(G, list(G.nodes), key='map_val')
+def get_map_data_as_list(G):
+    map_data = get_node_attributes_as_list(G, list(G.nodes), key='map_val')
+    map_data = [np.float(x) for x in map_data]
+    return map_data
 
 
-def coorce_map_nan_to_zero(map_data):
-    tmp = []
-    for x in map_data:
-        if np.isnan(x):
-            x = 0
-        tmp.append(np.float(x))
-    return tmp
+def get_map_as_dict(G, ignore_nans=False):
+    map_dict = {}
+    for node in G.nodes:
+        v = np.float(G.nodes[node]['map_val'])
+        if ignore_nans and not np.isnan(v):
+            map_dict.update({node:v})
+    return map_dict
 
 
 def get_neighbours_and_vals(G, nodes):
@@ -142,11 +149,17 @@ def remove_out_of_region_nodes(G, region_nodes, nodes):
     return list(set(region_nodes).intersection(set(nodes)))
 
 
-def expand_nodes(G, nodes, stepsize=1):
+def expand_nodes(G, nodes, stepsize=1, map_thresh=None, ignore_nans=False):
     orig_nodes = nodes[:]
     for i in range(stepsize):
         neighbours = get_neighbours_and_vals(G, nodes)
-        nodes += neighbours.keys()
+        if map_thresh:
+            neighbours = [k for k,v in neighbours.items() if v > map_thresh]
+        elif ignore_nans:
+            neighbours = [k for k,v in neighbours.items() if not np.isnan(v)]
+        else:
+            neighbours = neighbours.keys()
+        nodes += neighbours
     new_nodes=list(set(nodes)-set(orig_nodes))
     return nodes, new_nodes
 
@@ -191,6 +204,13 @@ def smooth_graph(G, nodes=None, n_its=1, kernel_size=1):
     return G_smooth
 
 
+def define_map_clusters(G):
+    map_data = get_map_data_as_list(G)
+    for x in map_data:
+        get_neighbours_and_vals(G, nodes)
+    pass
+
+
 # some functions for plotting
 def set3Dview(ax):
     ax.set_xlim(-100, 100)
@@ -209,20 +229,26 @@ def setzoomed3Dview(ax):
     return None
 
 
-def plot_nodes(G, nifti_name, node_sets=None, colors = ['white', 'black', 'pink']):
+def plot_nodes(G, nifti_name, node_sets=None,
+               colors = ['white', 'black', 'pink'], alpha = 1):
     '''nodes_sets is a list of upto 3 sets of nodes to draw - each will have a
     different colour'''
 
     mesh_coords, _ = nibabel.freesurfer.io.read_geometry(nifti_name)
 
     if graph_has_attributes(G):
-        map_data = get_map_data(G)
+        map_data = get_map_data_as_list(G)
 
-        map_data = coorce_map_nan_to_zero(map_data)
+        map_data = [0 if np.isnan(x) else x for x in map_data]
 
         ax = plt.axes(projection='3d')
+
         ax.scatter3D(mesh_coords[:, 0], mesh_coords[:, 1],
-                     mesh_coords[:, 2], s=1, c=map_data, cmap='jet')
+                     mesh_coords[:, 2], s=1, c=map_data, cmap='jet',
+                     alpha = alpha)
+
+    if isinstance(colors, str):
+        colors = [colors for i in range(len(node_sets))]
 
     if node_sets is not None:
         for nodes, color in zip(node_sets, colors):
