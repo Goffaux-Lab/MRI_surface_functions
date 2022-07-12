@@ -83,18 +83,10 @@ def graph_has_attributes(G):
     return G.nodes[0] != {}
 
 
-def get_map_data(G):
-    if graph_has_attributes(G):
-        return get_node_attributes_as_list(G, list(G.nodes), key='map_val')
-
-
-def coorce_map_nan_to_zero(map_data):
-    tmp = []
-    for x in map_data:
-        if np.isnan(x):
-            x = 0
-        tmp.append(np.float(x))
-    return tmp
+def get_map_data_as_list(G):
+    map_data = get_node_attributes_as_list(G, list(G.nodes), key='map_val')
+    map_data = [np.float(x) for x in map_data]
+    return map_data
 
 
 def get_neighbours_and_vals(G, nodes):
@@ -216,9 +208,7 @@ def plot_nodes(G, nifti_name, node_sets=None, colors = ['white', 'black', 'pink'
     mesh_coords, _ = nibabel.freesurfer.io.read_geometry(nifti_name)
 
     if graph_has_attributes(G):
-        map_data = get_map_data(G)
-
-        map_data = coorce_map_nan_to_zero(map_data)
+        map_data = get_map_data_as_list(G)
 
         ax = plt.axes(projection='3d')
         ax.scatter3D(mesh_coords[:, 0], mesh_coords[:, 1],
