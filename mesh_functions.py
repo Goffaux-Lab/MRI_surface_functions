@@ -227,7 +227,8 @@ def setzoomed3Dview(ax):
     return None
 
 
-def plot_nodes(G, nifti_name, node_sets=None, colors = ['white', 'black', 'pink']):
+def plot_nodes(G, nifti_name, node_sets=None,
+               colors = ['white', 'black', 'pink'], alpha = 1):
     '''nodes_sets is a list of upto 3 sets of nodes to draw - each will have a
     different colour'''
 
@@ -239,8 +240,13 @@ def plot_nodes(G, nifti_name, node_sets=None, colors = ['white', 'black', 'pink'
         map_data = [0 if np.isnan(x) else x for x in map_data]
 
         ax = plt.axes(projection='3d')
+
         ax.scatter3D(mesh_coords[:, 0], mesh_coords[:, 1],
-                     mesh_coords[:, 2], s=1, c=map_data, cmap='jet')
+                     mesh_coords[:, 2], s=1, c=map_data, cmap='jet',
+                     alpha = alpha)
+
+    if isinstance(colors, str):
+        colors = [colors for i in range(len(node_sets))]
 
     if node_sets is not None:
         for nodes, color in zip(node_sets, colors):
