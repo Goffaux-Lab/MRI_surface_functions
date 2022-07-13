@@ -65,14 +65,12 @@ mf.setzoomed3Dview(ax, 230, 15, 5)
 plt.show()
 
 ax = mf.plot_nodes(G, surf_name, node_sets=to_plot,
-                   colors = ['black',  'yellow',  'green',
-                             'cyan',    'blue',   'green',
-                             'pink',   'purple', 'cyan',
-                             'orange', 'magenta', 'white',
-                             'red',    'blue',   'yellow',
-                             'pink',   'purple', 'cyan',
-                             'orange', 'magenta', 'yellow',
-                             'red',    'blue',   'green'], alpha = 0.01)
+colors = ['black',  'yellow',  'green',   'cyan',    'blue',    'green',
+          'pink',   'purple',  'cyan',    'orange',  'magenta', 'white',
+          'red',    'blue',    'yellow',  'pink',    'purple',  'cyan',
+          'orange', 'magenta', 'yellow',  'red',     'blue',    'green'],
+          alpha = 0.01)
+
 mf.setzoomed3Dview(ax, 230, 15, 5)
 plt.show()
 ```
