@@ -318,7 +318,7 @@ def plot_nodes(G, nifti_name, node_sets=None,
     if node_sets is not None:
         for nodes, color in zip(node_sets, colors):
             ax.scatter3D(mesh_coords[nodes, 0], mesh_coords[nodes, 1],
-                         mesh_coords[nodes, 2], marker='o', s=30, c=color)
+                         mesh_coords[nodes, 2], marker='o', s=1, c=color)
 
     set3Dview(ax)
     return ax
