@@ -38,6 +38,12 @@ adding more vertices.
 Another use case is the turn the blobs of activation in a surface map into
 clusters, and then report the MNI coordinates. Below is the script to do that.
 
+The functions to do this were added to `mesh_functions.py` as needed - it's
+likely that there is not an exact function to do the task you want, but you can
+use the existing functions as building blocks to create a new function or
+script that does what you need. Any functions you make that are possibly useful
+to someone else should be added to `mesh_functions.py` through a pull request.
+
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 ```python
 import matplotlib.pyplot as plt
