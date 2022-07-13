@@ -252,7 +252,7 @@ def define_clusters(G, cluster_size_thresh=0, map_thresh=None, ignore_nans=True)
     return clusters
 
 
-def get_cluster_coords(surf_name, clusters, np_func_cen=np.mean,
+def get_cluster_coords(surf_name, clusters, np_func_cen=np.median,
                        lower_quantile=0.25, upper_quantile=0.75):
     mesh_coords, _ = nibabel.freesurfer.io.read_geometry(surf_name)
     cluster_coord_dict = {}
@@ -286,11 +286,11 @@ def set3Dview(ax):
     return None
 
 
-def setzoomed3Dview(ax):
-    set3Dview()
-    ax.azim =-77.20329531963876
-    ax.elev =-3.8354678562436106
-    ax.dist = 2.0
+def setzoomed3Dview(ax, azim=0, elev=0, zoom=6):
+    set3Dview(ax)
+    ax.azim = azim
+    ax.elev =- elev
+    ax.dist = zoom
     return None
 
 
