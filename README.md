@@ -61,7 +61,6 @@ mni_dict = mf.get_cluster_coords(surf_name, clusters, np_func_cen=np.median)
 # write those coords to a txt file
 mf.cluster_coords_to_txt(mni_dict, f'mni_cluster_coords_{map_name_only}_median.txt')
 
-
 # plot the functional map and the clusters
 to_plot = [list(v) for k,v in clusters.items()]
 
