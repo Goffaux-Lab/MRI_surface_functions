@@ -1,10 +1,11 @@
 # MRI_surface_functions
 Python functions for loading and manipulating a surface and functional map as a
 [graph object](https://en.wikipedia.org/wiki/Graph_(discrete_mathematics))
-(made with help from [Umut Canoluk](https://github.com/dafrius)). The functions
-in this repository allow you to do a few things that might not be so easy in
-FSL. To use them, you have to think of the surface, the functional maps, the
-labels/patches as a [graph
+(made with help from [Umut Canoluk](https://github.com/dafrius)).
+
+The functions in this repository allow you to do a few things that might not be
+so easy in FSL. To use them, you have to think of the surface, the functional
+maps, the labels/patches as a [graph
 object](https://en.wikipedia.org/wiki/Graph_(discrete_mathematics)) (some idea
 is given below).
 
@@ -31,6 +32,11 @@ that we are growing - that is, a set of vertices to which we are gradually
 adding more vertices.
 
 ## Example use: get MNI coordinates of surface activity 
+
+<img align="left" width="65%" src="/images/cluster.gif">
+
+Another use case is the turn the blobs of activation in a surface map into
+clusters, and then report the MNI coordinates. Below is the script to do that.
 
 ```python
 import matplotlib.pyplot as plt
@@ -69,4 +75,3 @@ ax = mf.plot_nodes(G, surf_name, node_sets=to_plot,
 mf.setzoomed3Dview(ax, 230, 15, 5)
 plt.show()
 ```
-![images/cluster.gif](images/cluster_cropped.gif)
