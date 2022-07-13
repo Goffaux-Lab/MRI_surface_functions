@@ -69,4 +69,4 @@ ax = mf.plot_nodes(G, surf_name, node_sets=to_plot,
 mf.setzoomed3Dview(ax, 230, 15, 5)
 plt.show()
 ```
-![images/cluster.gif](images/cluster.gif)
+![images/cluster.gif](images/cluster_cropped.gif)
