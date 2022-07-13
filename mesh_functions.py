@@ -227,12 +227,54 @@ def smooth_graph(G, nodes=None, n_its=1, kernel_size=1):
     return G_smooth
 
 
-def define_map_clusters(G):
-    map_data = get_map_data_as_list(G)
-    for x in map_data:
-        get_neighbours_and_vals(G, nodes)
-    pass
+def define_clusters(G, cluster_size_thresh=0, map_thresh=None, ignore_nans=True):
+    map_dict = get_map_as_dict(G, ignore_nans = ignore_nans)
+    visited = set()
+    clusters = {}
+    count = 0
+    for node in map_dict.keys():
+        candidates = [node]
+        cluster = set()
+        room = True
+        while room:
+            candidates, _ = expand_nodes(G, list(candidates),
+                                         map_thresh=map_thresh,
+                                         ignore_nans=ignore_nans)
+            candidates = set(candidates) - visited
+            if len(candidates) > 0:
+                cluster.update(candidates)
+                visited.update(candidates)
+            else:
+                room = False
+        if len(cluster) > cluster_size_thresh:
+            clusters.update({count:cluster})
+            count += 1
+    return clusters
 
+
+def get_cluster_coords(surf_name, clusters, np_func_cen=np.mean,
+                       lower_quantile=0.25, upper_quantile=0.75):
+    mesh_coords, _ = nibabel.freesurfer.io.read_geometry(surf_name)
+    cluster_coord_dict = {}
+    for k,v in clusters.items():
+        region = mesh_coords[list(v)]
+        mni_coords = [len(region)]
+        mni_coords += list(np_func_cen(region, axis=0))
+        mni_coords += list(np.quantile(region, lower_quantile, axis=0))
+        mni_coords += list(np.quantile(region, upper_quantile, axis=0))
+        cluster_coord_dict[k] = list(mni_coords)
+    return cluster_coord_dict
+
+
+def cluster_coords_to_txt(cluster_coord_dict, filename):
+    with open(filename, 'w') as f:
+        f.write('cluster\tn_vox\tX\tY\tZ\tX:25%\tX:25%\tY:25%\tY:75%\tZ:75%\tZ:75%')
+        f.write('\n')
+        for k,v in cluster_coord_dict.items():
+            rounded = [str(round(x, 1)) for x in v]
+            rounded = [str(k)] + rounded
+            f.write('\t'.join(rounded))
+            f.write('\n')
 
 # some functions for plotting
 def set3Dview(ax):
