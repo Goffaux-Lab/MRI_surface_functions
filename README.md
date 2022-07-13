@@ -29,3 +29,57 @@ different color. The black line in the image is the V1 border (that is, the
 vertices that are labelled as the border of V1). The pink region is a label
 that we are growing - that is, a set of vertices to which we are gradually
 adding more vertices.
+
+## Example use: get MNI coordinates of surface activity 
+
+```python
+import matplotlib.pyplot as plt
+import mesh_functions as mf
+import numpy as np
+
+# set paths 
+base_path = '/home/joliens/Documents/02_recurrentSF_3T/data-bids/derivatives/'
+surf_path = f'{base_path}freesurfer/fsaverage/surf/'
+map_path = f'{base_path}whole_brain_second_level_group/surfaces/'
+hemi = 'rh'
+surf_name = f'{surf_path}{hemi}.inflated_pre'
+map_name_only = f'{hemi}.HSF_minus_LSF_N16_sigthresh_fdr_smooth8_noart_8_smooth1x1_sigthresh'
+map_name = f'{map_path}{map_name_only}'
+
+# make a graph object with the surface and a functional map
+G = mf.surf_and_map_to_graph(surf_name, map_name, ext='mgh')
+
+# define clusters (taking all blobs separated by nan values)
+clusters = mf.define_clusters(G, cluster_size_thresh=0, map_thresh=None, ignore_nans=True)
+
+# find out each blob's MNI coordinates
+mni_dict = mf.get_cluster_coords(surf_name, clusters, np_func_cen=np.median)
+
+# write those coords to a txt file
+mf.cluster_coords_to_txt(mni_dict, f'mni_cluster_coords_{map_name_only}_median.txt')
+
+
+# plot 7 nice looking clusters
+to_plot = [list(v) for k,v in clusters.items()]
+
+ax = mf.plot_nodes(G, surf_name, alpha = 1)
+mf.setzoomed3Dview(ax, 230, 15, 5)
+plt.savefig('images/map.png')
+
+plt.show()
+
+ax = mf.plot_nodes(G, surf_name, node_sets=to_plot,
+                   colors = ['black',  'yellow',  'green',
+                             'cyan',    'blue',   'green',
+                             'pink',   'purple', 'cyan',
+                             'orange', 'magenta', 'white',
+                             'red',    'blue',   'yellow',
+                             'pink',   'purple', 'cyan',
+                             'orange', 'magenta', 'yellow',
+                             'red',    'blue',   'green'], alpha = 0.01)
+mf.setzoomed3Dview(ax, 230, 15, 5)
+plt.savefig('images/clusters.png')
+
+plt.show()
+```
+![images/cluster.gif](images/cluster.gif)
