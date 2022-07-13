@@ -33,11 +33,12 @@ adding more vertices.
 
 ## Example use: get MNI coordinates of surface activity 
 
-<img align="left" width="65%" src="/images/cluster_cropped.gif">
+<img align="right" width="65%" src="/images/cluster_cropped.gif">
 
 Another use case is the turn the blobs of activation in a surface map into
 clusters, and then report the MNI coordinates. Below is the script to do that.
 
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 ```python
 import matplotlib.pyplot as plt
 import mesh_functions as mf
