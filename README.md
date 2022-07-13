@@ -44,7 +44,7 @@ use the existing functions as building blocks to create a new function or
 script that does what you need. Any functions you make that are possibly useful
 to someone else should be added to `mesh_functions.py` through a pull request.
 
-<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/>
 ```python
 import matplotlib.pyplot as plt
 import mesh_functions as mf
