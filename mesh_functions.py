@@ -287,7 +287,7 @@ def set3Dview(ax):
 
 
 def setzoomed3Dview(ax, azim=0, elev=0, zoom=6):
-    mf.set3Dview(ax)
+    set3Dview(ax)
     ax.azim = azim
     ax.elev =- elev
     ax.dist = zoom
