@@ -104,6 +104,28 @@ def get_map_as_dict(G, ignore_nans=False):
     return map_dict
 
 
+def get_neighbours(G, nodes):
+    '''Get neighbours and associated values of set of nodes as dictionary'''
+    if isinstance(nodes, int):
+        nodes = [nodes]
+    node_neighbours = []
+    vals = []
+    for node in nodes:
+        for neighbours, _ in G.adj[node].items():
+            node_neighbours.append(neighbours)
+    return node_neighbours
+
+
+def get_multi_neighbours(G, nodes, neighbourhood_size):
+    neighbourhood = nodes
+    neighbours = nodes
+    for i in range(neighbourhood_size):
+        neighbours = get_neighbours(G, neighbours)
+        neighbours = list(set(neighbours) - set(neighbourhood))
+        neighbourhood += neighbours
+    return list(set(neighbourhood))
+
+
 def get_neighbours_and_vals(G, nodes):
     '''Get neighbours and associated values of set of nodes as dictionary'''
     if isinstance(nodes, int):
@@ -117,6 +139,7 @@ def get_neighbours_and_vals(G, nodes):
     return dict(zip(node_neighbours, vals))
 
 
+### THIS ONE DOESN'T SEEM RIGHT - NODES ARE NEVER UPDATED #####################
 def get_multi_neighbours_and_vals(G, nodes, neighbourhood_size):
     neighbourhood = {}
     for i in range(neighbourhood_size):
