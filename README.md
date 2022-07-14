@@ -61,12 +61,13 @@ mni_dict = mf.get_cluster_coords(surf_name, clusters, np_func_cen=np.median)
 # write those coords to a txt file
 mf.cluster_coords_to_txt(mni_dict, 'mni_cluster_coords.txt')
 
-# plot the functional map and the clusters
-to_plot = [list(v) for k,v in clusters.items()]
-
+# plot the functional map
 ax = mf.plot_nodes(G, surf_name, alpha = 1)
 mf.setzoomed3Dview(ax, 230, 15, 5)
 plt.show()
+
+# plot the clusters
+to_plot = [list(v) for k,v in clusters.items()]
 
 ax = mf.plot_nodes(G, surf_name, node_sets=to_plot,
 colors = ['black',  'yellow',  'green',   'cyan',    'blue',    'green',
