@@ -9,7 +9,7 @@ maps, the labels/patches as a [graph
 object](https://en.wikipedia.org/wiki/Graph_(discrete_mathematics)) (some idea
 is given below).
 
-<img align="left" width="65%" src="/images/done.gif">
+<img align="left" width="55%" src="/images/done.gif">
 
 A brain surface is made from vertices (those are the individual dots you see in
 the image) connected by edges (those are not drawn, but you can imagine that
@@ -33,7 +33,7 @@ adding more vertices.
 
 ## Example use: get MNI coordinates of surface activity 
 
-<img align="right" width="65%" src="/images/cluster_cropped.gif">
+<img align="right" width="55%" src="/images/cluster_cropped.gif">
 
 Another use case is the turn the blobs of activation in a surface map into
 clusters, and then report the MNI coordinates. Below is the script to do that.
